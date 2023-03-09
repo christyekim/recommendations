@@ -44,11 +44,72 @@ def index():
 
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
+#@everyone - add your code below here!
 ######################################################################
 
 ######################################################################
-# LIST ALL RECOMMENDATIONS
+# LIST ALL RECOMMENDATIONS (LIST)
 ######################################################################
 @app.route("/recommendations", methods=["GET"])
 def list_recommendations():
     return status.HTTP_200_OK
+
+######################################################################
+# RETRIEVE A RECOMMENDATION (READ)
+######################################################################
+@app.route("/recommendations/<int:id>", methods=["GET"])
+def get_recommendation(id):
+    """
+    Retrieve a single recommendation
+    This endpoint will return a recommendation based on it's id
+    """
+    app.logger.info("Request for recommendation with id: %s", id)
+    recommendation = Recommendation.find(id)
+    if not recommendation:
+        abort(status.HTTP_404_NOT_FOUND, f"recommendation with id '{id}' was not found.")
+
+    app.logger.info("Returning recommendation: %s", recommendation.user_segment)
+    return jsonify(recommendation.serialize()), status.HTTP_200_OK
+
+######################################################################
+# ADD A NEW RECOMMENDATION (CREATE)
+######################################################################
+@app.route("/recommendations", methods=["POST"])
+def create_recommendation():
+    """
+    Creates a recommendation
+    This endpoint will create a recommendation based the data in the body that is posted
+    """
+    app.logger.info("Request to create a recommendation")
+    check_content_type("application/json")
+    recommendation = Recommendation()
+    recommendation.deserialize(request.get_json())
+    recommendation.create()
+    message = recommendation.serialize()
+    location_url = url_for("get_recommendation", id=recommendation.id, _external=True)
+
+    app.logger.info("Recommendation with ID [%s] created.", recommendation.id)
+    return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
+
+
+
+######################################################################
+#  U T I L I T Y   F U N C T I O N S
+######################################################################
+def check_content_type(content_type):
+    """Checks that the media type is correct"""
+    if "Content-Type" not in request.headers:
+        app.logger.error("No Content-Type specified.")
+        abort(
+            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            f"Content-Type must be {content_type}",
+        )
+
+    if request.headers["Content-Type"] == content_type:
+        return
+
+    app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
+    abort(
+        status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+        f"Content-Type must be {content_type}",
+    )
