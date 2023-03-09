@@ -44,17 +44,18 @@ def index():
 
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
+#@everyone - add your code below here!
 ######################################################################
 
 ######################################################################
-# LIST ALL RECOMMENDATIONS
+# LIST ALL RECOMMENDATIONS (LIST)
 ######################################################################
 @app.route("/recommendations", methods=["GET"])
 def list_recommendations():
     return status.HTTP_200_OK
 
 ######################################################################
-# RETRIEVE A RECOMMENDATION
+# RETRIEVE A RECOMMENDATION (READ)
 ######################################################################
 @app.route("/recommendations/<int:id>", methods=["GET"])
 def get_recommendation(id):
@@ -71,13 +72,13 @@ def get_recommendation(id):
     return jsonify(recommendation.serialize()), status.HTTP_200_OK
 
 ######################################################################
-# ADD A NEW PET
+# ADD A NEW RECOMMENDATION (CREATE)
 ######################################################################
 @app.route("/recommendations", methods=["POST"])
 def create_recommendation():
     """
     Creates a recommendation
-    This endpoint will create a Pet based the data in the body that is posted
+    This endpoint will create a recommendation based the data in the body that is posted
     """
     app.logger.info("Request to create a recommendation")
     check_content_type("application/json")
@@ -87,7 +88,7 @@ def create_recommendation():
     message = recommendation.serialize()
     location_url = url_for("get_recommendation", id=recommendation.id, _external=True)
 
-    app.logger.info("Pet with ID [%s] created.", recommendation.id)
+    app.logger.info("Recommendation with ID [%s] created.", recommendation.id)
     return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
 

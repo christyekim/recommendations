@@ -69,9 +69,10 @@ class TestRecommendationService(TestCase):
             recommendations.append(test_recommendation)
         return recommendations
 
-    ######################################################################
-    #  P L A C E   T E S T   C A S E S   H E R E
-    ######################################################################
+######################################################################
+#  P L A C E   T E S T   C A S E S  &   S A D   P A T H S   H E R E
+#Tip: Make sure to grab from both 'test cases' and 'sad paths'!
+######################################################################
 
     def test_index(self):
         """It should call the Home Page"""
@@ -89,7 +90,7 @@ class TestRecommendationService(TestCase):
         self.assertEqual(data["message"], "Healthy")
 
 ######################################################################
-    #  GET A RECOMMENDATION
+    #  RETRIEVE/GET A RECOMMENDATION (READ)
 ######################################################################
 
     def test_get_recommendation(self):
@@ -109,6 +110,10 @@ class TestRecommendationService(TestCase):
         logging.debug("Response data = %s", data)
         self.assertIn("was not found", data["message"])
 
+######################################################################
+    #  ADD A RECOMMENDATION (CREATE)
+######################################################################
+
     def test_create_recommendation_no_content_type(self):
         """It should not Create a recommendation with no content type"""
         response = self.client.post(BASE_URL)
@@ -118,3 +123,4 @@ class TestRecommendationService(TestCase):
         """It should not Create a recommendation with the wrong content type"""
         response = self.client.post(BASE_URL, data="hello", content_type="text/html")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
