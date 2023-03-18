@@ -52,7 +52,21 @@ def index():
 ######################################################################
 @app.route("/recommendations", methods=["GET"])
 def list_recommendations():
-    return status.HTTP_200_OK
+    """Returns all of the Recommendations"""
+    app.logger.info("Request for recommendation list")
+    recommendations = []
+    id = request.args.get("id")
+    user_segment = request.args.get("user_segment")
+    if id:
+        recommendations = Recommendation.find_by_id(id)
+    elif user_segment:
+        recommendations = Recommendation.find_by_user_segment(user_segment)
+    else:
+        recommendations = Recommendation.all()
+
+    results = [recommendation.serialize() for recommendation in recommendations]
+    app.logger.info("Returning %d recommendations", len(results))
+    return jsonify(results), status.HTTP_200_OK
 
 ######################################################################
 # RETRIEVE A RECOMMENDATION (READ)
