@@ -16,6 +16,7 @@ from unittest import TestCase
 # from unittest.mock import MagicMock, patch
 
 from service import app
+from urllib.parse import quote_plus
 from service.models import db, init_db, Recommendation
 from service.common import status  # HTTP Status Codes
 from tests.factories import RecommendationFactory
@@ -101,6 +102,7 @@ class TestRecommendationService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(data["user_segment"], test_recommendation.user_segment)
+        
 
     def test_get_recommendation_not_found(self):
         """It should not Get a recommendation thats not found"""
@@ -124,3 +126,61 @@ class TestRecommendationService(TestCase):
         response = self.client.post(BASE_URL, data="hello", content_type="text/html")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
+######################################################################
+## Added by Yinka, some list test are dependent on the tests below.
+######################################################################
+    
+    def test_create_recommendation(self):
+        """It should Create a new Recommendation"""
+        test_recommendation = RecommendationFactory()
+        logging.debug("Test Recommendation: %s", test_recommendation.serialize())
+        response = self.client.post(BASE_URL, json=test_recommendation.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Make sure location header is set
+        location = response.headers.get("Location", None)
+        self.assertIsNotNone(location)
+
+        # Check the data is correct
+        new_recommendation = response.get_json()
+        self.assertEqual(new_recommendation["user_segment"], test_recommendation.user_segment)
+        self.assertEqual(new_recommendation["product_id"], test_recommendation.product_id)
+        self.assertEqual(new_recommendation["user_id"], test_recommendation.user_id)
+
+        
+        # Check that the location header was correct
+        response = self.client.get(location)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        new_recommendation = response.get_json()
+        self.assertEqual(new_recommendation["user_segment"], test_recommendation.user_segment)
+        self.assertEqual(new_recommendation["product_id"], test_recommendation.product_id)
+        self.assertEqual(new_recommendation["user_id"], test_recommendation.user_id)
+
+
+######################################################################
+    #  LIST A RECOMMENDATION (LIST)
+######################################################################
+
+    def test_get_recommendation_list(self):
+        """It should Get a list of Recommendations"""
+        self._create_recommendations(5)
+        response = self.client.get(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
+
+    def test_query_recommendation_list_by_user_segment(self):
+        """It should Query Recommendations by User Segment"""
+        recommendations = self._create_recommendations(10)
+        test_user_segment = recommendations[0].user_segment
+        user_segment_recommendations = [recommendation for recommendation in recommendations if recommendation.user_segment == test_user_segment]
+        response = self.client.get(
+            BASE_URL,
+            query_string=f"user_segment={quote_plus(test_user_segment)}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), len(user_segment_recommendations))
+        # check the data just to be sure
+        for recommendation in data:
+            self.assertEqual(recommendation["user_segment"], test_user_segment)
