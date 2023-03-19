@@ -102,6 +102,7 @@ class TestRecommendationService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(data["user_segment"], test_recommendation.user_segment)
+        
 
     def test_get_recommendation_not_found(self):
         """It should not Get a recommendation thats not found"""
@@ -128,20 +129,6 @@ class TestRecommendationService(TestCase):
 ######################################################################
 ## Added by Yinka, some list test are dependent on the tests below.
 ######################################################################
-
-    def _create_recommendations(self, count):
-        """Factory method to create recommendations in bulk"""
-        recommendations = []
-        for _ in range(count):
-            test_recommendation = RecommendationFactory()
-            response = self.client.post(BASE_URL, json=test_recommendation.serialize())
-            self.assertEqual(
-                response.status_code, status.HTTP_201_CREATED, "Could not create test recommendation"
-            )
-            new_recommendation = response.get_json()
-            test_recommendation.id = new_recommendation["id"]
-            recommendations.append(test_recommendation)
-        return recommendations
     
     def test_create_recommendation(self):
         """It should Create a new Recommendation"""
