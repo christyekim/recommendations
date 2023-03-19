@@ -57,9 +57,7 @@ def list_recommendations():
     recommendations = []
     id = request.args.get("id")
     user_segment = request.args.get("user_segment")
-    if id:
-        recommendations = Recommendation.find_by_id(id)
-    elif user_segment:
+    if user_segment:
         recommendations = Recommendation.find_by_user_segment(user_segment)
     else:
         recommendations = Recommendation.all()
