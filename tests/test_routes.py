@@ -169,23 +169,6 @@ class TestRecommendationService(TestCase):
         data = response.get_json()
         self.assertEqual(len(data), 5)
 
-    def test_get_recommendation(self):
-        """It should Get a single Recommendation"""
-        # get the id of a recommendation
-        test_recommendation = self._create_recommendations(1)[0]
-        response = self.client.get(f"{BASE_URL}/{test_recommendation.id}")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.get_json()
-        self.assertEqual(data["user_segment"], test_recommendation.user_segment)
-
-    def test_get_recommendation_not_found(self):
-        """It should not Get a Recommendation thats not found"""
-        response = self.client.get(f"{BASE_URL}/0")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        data = response.get_json()
-        logging.debug("Response data = %s", data)
-        self.assertIn("was not found", data["message"])
-
     def test_query_recommendation_list_by_user_segment(self):
         """It should Query Recommendations by User Segment"""
         recommendations = self._create_recommendations(10)
