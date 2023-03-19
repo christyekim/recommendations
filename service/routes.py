@@ -91,6 +91,33 @@ def create_recommendation():
     app.logger.info("Recommendation with ID [%s] created.", recommendation.id)
     return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
+######################################################################
+# UPDATE AN EXISTING recommendation
+######################################################################
+@app.route("/recommendations/<int:id>", methods=["PUT"])
+def update_recommendations(id):
+	"""
+	Update a recommendation
+	
+	This endpoint will update a recommendation based the body that is posted
+	"""
+	app.logger.info("Request to update recommendation with id: %s", id)
+	check_content_type("application/json")
+	
+
+	recommendation = Recommendation.find(id)
+	if not recommendation:
+	    abort(status.HTTP_404_NOT_FOUND, f"recommendation with id '{id}' was not found.")
+	
+
+	recommendation.deserialize(request.get_json())
+	recommendation.id = id
+	recommendation.update()
+	
+
+	app.logger.info("recommendation with ID [%s] updated.", recommendation.id)
+	return jsonify(recommendation.serialize()), status.HTTP_200_OK
+
 
 
 ######################################################################

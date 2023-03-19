@@ -124,3 +124,33 @@ class TestRecommendationService(TestCase):
         response = self.client.post(BASE_URL, data="hello", content_type="text/html")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
+######################################################################
+#  Update A RECOMMENDATION (Update)
+######################################################################
+    def test_update_recommendation(self):
+	    """It should Update an existing recommendation"""
+	    # create a recommendation to update
+	    test_recommendation = RecommendationFactory()
+	    response = self.client.post(BASE_URL, json=test_recommendation.serialize())
+	    self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # update the recommendation
+	    new_recommendation = response.get_json()
+	    logging.debug(new_recommendation)
+	    new_recommendation["user_segment"] = "unknown"
+	    response = self.client.put(f"{BASE_URL}/{new_recommendation['id']}", json=new_recommendation)
+	    self.assertEqual(response.status_code, status.HTTP_200_OK)
+	    updated_recommendation = response.get_json()
+	    self.assertEqual(updated_recommendation["user_segment"], "unknown")
+
+    def test_update_recommendation_not_found(self):
+        """It should Update a Recommendation and Return Not Found"""
+        test_recommendation = RecommendationFactory()
+        response = self.client.post(BASE_URL, json=test_recommendation.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        new_recommendation = response.get_json()
+        logging.debug(new_recommendation)
+        new_recommendation["user_segment"] = "unknown"
+        new_recommendation['id'] = 0
+        response = self.client.put(f"{BASE_URL}/{new_recommendation['id']}", json=new_recommendation)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
