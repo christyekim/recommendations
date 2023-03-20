@@ -69,6 +69,16 @@ class TestRecommendationService(TestCase):
             test_recommendation.id = new_recommendation["id"]
             recommendations.append(test_recommendation)
         return recommendations
+    
+    def test_delete_recommendation(self):
+        """It should Delete a Recommendation"""
+        test_recommendation = self._create_recommendations(1)[0]
+        response = self.client.delete(f"{BASE_URL}/{test_recommendation.id}")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0)
+        # make sure they are deleted
+        response = self.client.get(f"{BASE_URL}/{test_recommendation.id}")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 ######################################################################
 #  P L A C E   T E S T   C A S E S  &   S A D   P A T H S   H E R E

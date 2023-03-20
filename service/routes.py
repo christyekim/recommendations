@@ -104,6 +104,23 @@ def create_recommendation():
     return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
 ######################################################################
+# DELETE A RECOMMENDATION
+######################################################################
+@app.route("/recommendations/<int:id>", methods=["DELETE"])
+def delete_recommendation(id):
+    """
+    Delete a recommendation
+    This endpoint will delete a recommendation based the id specified in the path
+    """
+    app.logger.info("Request to delete recommendation with id: %s", id)
+    recommendation = Recommendation.find(id)
+    if recommendation:
+        recommendation.delete()
+        
+    app.logger.info("Recommendation with ID [%s] delete complete.", id)
+    return "", status.HTTP_204_NO_CONTENT
+    
+######################################################################   
 # UPDATE AN EXISTING recommendation
 ######################################################################
 @app.route("/recommendations/<int:id>", methods=["PUT"])
@@ -116,21 +133,16 @@ def update_recommendations(id):
 	app.logger.info("Request to update recommendation with id: %s", id)
 	check_content_type("application/json")
 	
-
 	recommendation = Recommendation.find(id)
 	if not recommendation:
 	    abort(status.HTTP_404_NOT_FOUND, f"recommendation with id '{id}' was not found.")
-	
-
+        
 	recommendation.deserialize(request.get_json())
 	recommendation.id = id
 	recommendation.update()
 	
-
 	app.logger.info("recommendation with ID [%s] updated.", recommendation.id)
 	return jsonify(recommendation.serialize()), status.HTTP_200_OK
-
-
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
