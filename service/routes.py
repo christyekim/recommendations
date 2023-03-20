@@ -125,25 +125,24 @@ def delete_recommendation(id):
 ######################################################################
 @app.route("/recommendations/<int:id>", methods=["PUT"])
 def update_recommendations(id):
-	  """
-	  Update a recommendation
+	"""
+	Update a recommendation
 	
-	  This endpoint will update a recommendation based the body that is posted
-	  """
-	  app.logger.info("Request to update recommendation with id: %s", id)
-	  check_content_type("application/json")
+	This endpoint will update a recommendation based the body that is posted
+	"""
+	app.logger.info("Request to update recommendation with id: %s", id)
+	check_content_type("application/json")
 	
-
-	  recommendation = Recommendation.find(id)
-	  if not recommendation:
-	      abort(status.HTTP_404_NOT_FOUND, f"recommendation with id '{id}' was not found.")
+	recommendation = Recommendation.find(id)
+	if not recommendation:
+	    abort(status.HTTP_404_NOT_FOUND, f"recommendation with id '{id}' was not found.")
         
-	  recommendation.deserialize(request.get_json())
-	  recommendation.id = id
-	  recommendation.update()
+	recommendation.deserialize(request.get_json())
+	recommendation.id = id
+	recommendation.update()
 	
-	  app.logger.info("recommendation with ID [%s] updated.", recommendation.id)
-	  return jsonify(recommendation.serialize()), status.HTTP_200_OK
+	app.logger.info("recommendation with ID [%s] updated.", recommendation.id)
+	return jsonify(recommendation.serialize()), status.HTTP_200_OK
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
