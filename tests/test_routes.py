@@ -15,8 +15,8 @@ import logging
 from unittest import TestCase
 # from unittest.mock import MagicMock, patch
 
-from service import app
 from urllib.parse import quote_plus
+from service import app
 from service.models import db, init_db, Recommendation
 from service.common import status  # HTTP Status Codes
 from tests.factories import RecommendationFactory
@@ -63,13 +63,14 @@ class TestRecommendationService(TestCase):
             test_recommendation = RecommendationFactory()
             response = self.client.post(BASE_URL, json=test_recommendation.serialize())
             self.assertEqual(
-                response.status_code, status.HTTP_201_CREATED, "Could not create test recommendation"
+                response.status_code,
+                status.HTTP_201_CREATED, "Could not create test recommendation"
             )
             new_recommendation = response.get_json()
             test_recommendation.id = new_recommendation["id"]
             recommendations.append(test_recommendation)
         return recommendations
-    
+
     def test_delete_recommendation(self):
         """It should Delete a Recommendation"""
         test_recommendation = self._create_recommendations(1)[0]
@@ -112,7 +113,7 @@ class TestRecommendationService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(data["user_segment"], test_recommendation.user_segment)
-        
+
 
     def test_get_recommendation_not_found(self):
         """It should not Get a recommendation thats not found"""
@@ -140,20 +141,21 @@ class TestRecommendationService(TestCase):
 #  Update A RECOMMENDATION (Update)
 ######################################################################
     def test_update_recommendation(self):
-	    """It should Update an existing recommendation"""
-	    # create a recommendation to update
-	    test_recommendation = RecommendationFactory()
-	    response = self.client.post(BASE_URL, json=test_recommendation.serialize())
-	    self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        """It should Update an existing recommendation"""
+        # create a recommendation to update
+        test_recommendation = RecommendationFactory()
+        response = self.client.post(BASE_URL, json=test_recommendation.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # update the recommendation
-	    new_recommendation = response.get_json()
-	    logging.debug(new_recommendation)
-	    new_recommendation["user_segment"] = "unknown"
-	    response = self.client.put(f"{BASE_URL}/{new_recommendation['id']}", json=new_recommendation)
-	    self.assertEqual(response.status_code, status.HTTP_200_OK)
-	    updated_recommendation = response.get_json()
-	    self.assertEqual(updated_recommendation["user_segment"], "unknown")
+        new_recommendation = response.get_json()
+        logging.debug(new_recommendation)
+        new_recommendation["user_segment"] = "unknown"
+        response = self.client.put(f"{BASE_URL}/{new_recommendation['id']}",
+                                   json=new_recommendation)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        updated_recommendation = response.get_json()
+        self.assertEqual(updated_recommendation["user_segment"], "unknown")
 
     def test_update_recommendation_not_found(self):
         """It should Update a Recommendation and Return Not Found"""
@@ -164,12 +166,13 @@ class TestRecommendationService(TestCase):
         logging.debug(new_recommendation)
         new_recommendation["user_segment"] = "unknown"
         new_recommendation['id'] = 0
-        response = self.client.put(f"{BASE_URL}/{new_recommendation['id']}", json=new_recommendation)
+        response = self.client.put(f"{BASE_URL}/{new_recommendation['id']}",
+                                   json=new_recommendation)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-######################################################################    
-## Added by Yinka, some list test are dependent on the tests below.
-######################################################################   
+######################################################################
+## Some list test are dependent on the tests below.
+######################################################################
     def test_create_recommendation(self):
         """It should Create a new Recommendation"""
         test_recommendation = RecommendationFactory()
@@ -187,7 +190,6 @@ class TestRecommendationService(TestCase):
         self.assertEqual(new_recommendation["product_id"], test_recommendation.product_id)
         self.assertEqual(new_recommendation["user_id"], test_recommendation.user_id)
 
-        
         # Check that the location header was correct
         response = self.client.get(location)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -213,7 +215,9 @@ class TestRecommendationService(TestCase):
         """It should Query Recommendations by User Segment"""
         recommendations = self._create_recommendations(10)
         test_user_segment = recommendations[0].user_segment
-        user_segment_recommendations = [recommendation for recommendation in recommendations if recommendation.user_segment == test_user_segment]
+        user_segment_recommendations = [
+            recommendation for recommendation in recommendations if (
+            recommendation.user_segment == test_user_segment)]
         response = self.client.get(
             BASE_URL,
             query_string=f"user_segment={quote_plus(test_user_segment)}"
