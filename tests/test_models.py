@@ -26,6 +26,8 @@ DATABASE_URI = os.getenv(
 #  Recommendation   M O D E L   T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
+
+
 class TestRecommendationModel(unittest.TestCase):
     """ Test Cases for Recommendation Model """
 
@@ -95,7 +97,7 @@ class TestRecommendationModel(unittest.TestCase):
         self.assertIsNotNone(rec.id)
         recs = Recommendation.all()
         self.assertEqual(len(recs), 1)
-    
+
     def test_read_a_recommendation(self):
         """It should Read a Recommendation"""
         rec = RecommendationFactory()
@@ -107,8 +109,9 @@ class TestRecommendationModel(unittest.TestCase):
         found_rec = Recommendation.find(rec.id)
         self.assertEqual(found_rec.id, rec.id)
         self.assertEqual(found_rec.user_segment, rec.user_segment)
-        self.assertEqual(found_rec.recommendation_type, rec.recommendation_type)
-    
+        self.assertEqual(found_rec.recommendation_type,
+                         rec.recommendation_type)
+
     def test_update_a_recommendation(self):
         """It should Update a Recommendation"""
         rec = RecommendationFactory()
@@ -118,7 +121,7 @@ class TestRecommendationModel(unittest.TestCase):
         logging.debug(rec)
         self.assertIsNotNone(rec.id)
         # Change it an save it
-        rec.user_segment="z3r0"
+        rec.user_segment = "z3r0"
         original_id = rec.id
         rec.update()
         self.assertEqual(rec.id, original_id)
@@ -157,7 +160,7 @@ class TestRecommendationModel(unittest.TestCase):
         # See if we get back 5 recs
         recs = Recommendation.all()
         self.assertEqual(len(recs), 5)
-    
+
     def test_serialize_a_recommendation(self):
         """It should serialize a Recommendation"""
         rec = RecommendationFactory()
@@ -176,9 +179,11 @@ class TestRecommendationModel(unittest.TestCase):
         self.assertIn("bought_in_last30d", data)
         self.assertEqual(data["bought_in_last30d"], rec.bought_in_last30d)
         self.assertIn("last_relevance_date", data)
-        self.assertEqual(date.fromisoformat(data["last_relevance_date"]), rec.last_relevance_date)
+        self.assertEqual(date.fromisoformat(
+            data["last_relevance_date"]), rec.last_relevance_date)
         self.assertIn("recommendation_type", data)
-        self.assertEqual(data["recommendation_type"], rec.recommendation_type.name)
+        self.assertEqual(data["recommendation_type"],
+                         rec.recommendation_type.name)
 
     def test_deserialize_a_recommendation(self):
         """It should deserialize a Recommendation"""
@@ -192,8 +197,10 @@ class TestRecommendationModel(unittest.TestCase):
         self.assertEqual(rec.user_segment, data["user_segment"])
         self.assertEqual(rec.viewed_in_last7d, data["viewed_in_last7d"])
         self.assertEqual(rec.bought_in_last30d, data["bought_in_last30d"])
-        self.assertEqual(rec.last_relevance_date, date.fromisoformat(data["last_relevance_date"]))
-        self.assertEqual(rec.recommendation_type.name, data["recommendation_type"])
+        self.assertEqual(rec.last_relevance_date,
+                         date.fromisoformat(data["last_relevance_date"]))
+        self.assertEqual(rec.recommendation_type.name,
+                         data["recommendation_type"])
 
     def test_deserialize_missing_data(self):
         """It should not deserialize a Recommendation with missing data"""
@@ -250,7 +257,7 @@ class TestRecommendationModel(unittest.TestCase):
         self.assertEqual(rec.bought_in_last30d, recs[1].bought_in_last30d)
         self.assertEqual(rec.last_relevance_date, recs[1].last_relevance_date)
         self.assertEqual(rec.recommendation_type, recs[1].recommendation_type)
-    
+
     def test_find_recommendation_or_404(self):
         """It should Find a Recommendation by ID or return 404_NOT_FOUND if not found"""
         recs = RecommendationFactory.create_batch(3)
@@ -270,11 +277,11 @@ class TestRecommendationModel(unittest.TestCase):
         self.assertEqual(rec.bought_in_last30d, recs[1].bought_in_last30d)
         self.assertEqual(rec.last_relevance_date, recs[1].last_relevance_date)
         self.assertEqual(rec.recommendation_type, recs[1].recommendation_type)
-    
+
     def test_find_recommendation_or_404_not_found(self):
         """It should return 404_NOT_FOUND for ID not found"""
         self.assertRaises(NotFound, Recommendation.find_or_404, 0)
-    
+
     def test_find_by_product_id(self):
         """It should Find Recommendations by Product ID"""
         recs = RecommendationFactory.create_batch(5)
@@ -286,7 +293,7 @@ class TestRecommendationModel(unittest.TestCase):
         self.assertEqual(found.count(), count)
         for rec in found:
             self.assertEqual(rec.product_id, product_id)
-    
+
     def test_find_by_user_id(self):
         """It should Find Recommendations by User ID"""
         recs = RecommendationFactory.create_batch(5)
@@ -317,56 +324,64 @@ class TestRecommendationModel(unittest.TestCase):
         for rec in recs:
             rec.create()
         viewed_in_last7d = recs[0].viewed_in_last7d
-        count = len([rec for rec in recs if rec.viewed_in_last7d == viewed_in_last7d])
+        count = len(
+            [rec for rec in recs if rec.viewed_in_last7d == viewed_in_last7d])
         found = Recommendation.find_by_viewed_in_last7d(viewed_in_last7d)
         self.assertEqual(found.count(), count)
         for rec in found:
             self.assertEqual(rec.viewed_in_last7d, viewed_in_last7d)
-    
+
     def test_find_by_bought_in_last30d(self):
         """It should Find Recommendations by bought_in_last30d"""
         recs = RecommendationFactory.create_batch(10)
         for rec in recs:
             rec.create()
         bought_in_last30d = recs[0].bought_in_last30d
-        count = len([rec for rec in recs if rec.bought_in_last30d == bought_in_last30d])
+        count = len(
+            [rec for rec in recs if rec.bought_in_last30d == bought_in_last30d])
         found = Recommendation.find_by_bought_in_last30d(bought_in_last30d)
         self.assertEqual(found.count(), count)
         for rec in found:
             self.assertEqual(rec.bought_in_last30d, bought_in_last30d)
-    
+
     def test_find_by_recommendation_type(self):
         """It should Find Recommendations by recommendation_type"""
         recs = RecommendationFactory.create_batch(10)
         for rec in recs:
             rec.create()
         recommendation_type = recs[0].recommendation_type
-        count = len([rec for rec in recs if rec.recommendation_type == recommendation_type])
+        count = len(
+            [rec for rec in recs if rec.recommendation_type == recommendation_type])
         found = Recommendation.find_by_recommendation_type(recommendation_type)
         self.assertEqual(found.count(), count)
         for rec in found:
             self.assertEqual(rec.recommendation_type, recommendation_type)
-    
+
     def test_find_by_last_relevance_date(self):
         """It should Find Recommendations by last_relevance_date"""
         recs = RecommendationFactory.create_batch(10)
         for rec in recs:
             rec.create()
         last_relevance_date = recs[0].last_relevance_date.isoformat()
-        count = len([rec for rec in recs if rec.last_relevance_date.isoformat() == last_relevance_date])
+        count = len(
+            [rec for rec in recs if rec.last_relevance_date.isoformat() == last_relevance_date])
         found = Recommendation.find_by_last_relevance_date(last_relevance_date)
         self.assertEqual(found.count(), count)
         for rec in found:
-            self.assertEqual(rec.last_relevance_date.isoformat(), last_relevance_date)
-    
+            self.assertEqual(
+                rec.last_relevance_date.isoformat(), last_relevance_date)
+
     def test_find_after_last_relevance_date(self):
         """It should Find Recommendations after last_relevance_date"""
         recs = RecommendationFactory.create_batch(10)
         for rec in recs:
             rec.create()
         last_relevance_date = recs[0].last_relevance_date.isoformat()
-        count = len([rec for rec in recs if rec.last_relevance_date.isoformat() >= last_relevance_date])
-        found = Recommendation.find_after_last_relevance_date(last_relevance_date)
+        count = len(
+            [rec for rec in recs if rec.last_relevance_date.isoformat() >= last_relevance_date])
+        found = Recommendation.find_after_last_relevance_date(
+            last_relevance_date)
         self.assertEqual(found.count(), count)
         for rec in found:
-            self.assertGreaterEqual(rec.last_relevance_date.isoformat(), last_relevance_date)
+            self.assertGreaterEqual(
+                rec.last_relevance_date.isoformat(), last_relevance_date)
